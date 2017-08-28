@@ -1,41 +1,49 @@
-function Game(dimension) {
-	this.dimension = dimension;
-	this.totalBoxes = dimension * dimension;
-	this.board = this.newBoard(this.totalBoxes);
+function Game() {
+	this.dimension;
+	this.totalBoxes;
+	// this.board = this.newBoard(this.totalBoxes);
+	this.board = [];
+	this.mineLocations = [];
+	this.flagLocations = [];
 }
 
 Game.prototype = {
 	constructor: Game,
 
-	newBoard: function(totalBoxes) {
-		let array = Array.from({ length: totalBoxes }, (v, i) => 0);
+	createBoard: function(dimension) {
+		this.dimension = dimension;
+		this.totalBoxes = dimension * dimension;
+		let array = Array.from({ length: this.totalBoxes }, (v, i) => 0);
 		array = this.addMines(array);
 		array = this.addClues(array);
-
-		console.log(array.toString());
-		return array;
+		this.board = array;
 	},
 
 	addMines: function(array) {
-		let mines = [];
-		while (mines.length < this.dimension) {
-			let index = this.randomIndex(this.totalBoxes);
-			array[index] = 'm';
-			mines = array.filter(item => {
-				return item === 'm';
-			});
+		// let mines = [];
+		// while (mines.length < this.dimension) {
+		// 	let index = this.randomIndex();
+		// 	array[index] = 'm';
+		// 	mines = array.filter(item => item === 'm');
+		// }
+		while (this.mineLocations.length < this.dimension) {
+			let index = this.randomIndex();
+			if (this.mineLocations.indexOf(index) === -1) {
+				array[index] = 'm';
+				this.mineLocations.push(index);
+			}
 		}
 		return array;
 	},
 
-	randomIndex: function(totalBoxes) {
-		return Math.floor(Math.random() * Math.floor(totalBoxes));
+	randomIndex: function() {
+		return Math.floor(Math.random() * Math.floor(this.totalBoxes));
 	},
 
-	findNeighbors: function(i) {// returns array of index numbers
+	findNeighbors: function(i) {	// returns array of index numbers
 		let result = [];
-		let d = this.dimension,
-		 	 omega = this.totalBoxes;
+		let d = this.dimension;
+		let omega = this.totalBoxes;
 		if (i === 0) {														// first
 			result = [1, d, d + 1];
 		} else if (i > 0 && i < d - 1) {									// top row
@@ -62,28 +70,71 @@ Game.prototype = {
 		let neighbors = [];
 		for (let i = 0; i < array.length; i++) {
 			if (array[i] === 'm') {
-				console.log('mine!');
-
 				let result = this.findNeighbors(i);
-
 				for (let j = 0; j < result.length; j++) {
-					if (array[result[j]] !== 'm') {
-						neighbors.push(result[j]);
+					let index = result[j];
+					if (array[index] !== 'm') {
+						neighbors.push(index);
 					}
 				}
-
-				console.log(neighbors);
 			}
 		}
 		for (let k = 0; k < neighbors.length; k++) {
 			let index = neighbors[k];
 			array[index] += 1;
 		}
-		console.log(neighbors.toString());
 		return array;
+	},
+	
+	toggleFlag: function(index) {
+		if (this.flagLocations.length < this.mineLocations.length) {
+			if (this.flagLocations.indexOf(index) === -1) {			// place a flag
+				this.flagLocations.push(index);
+				// add class UI
+			} else {												// remove a flag
+				let j = this.flagLocations.indexOf(index);
+				this.flagLocations.splice(j,1);
+				// remove class UI
+			}
+		} else { // out of flags
+			// message on UI 
+		}
+	},
+	
+	checkClick: function(index) {
+		if (this.mineLocations.indexOf(index) !== 1) {				// lose
+				
+		} else if (this.board[index] > 0) {							// clue > 0
+			
+		} else {													// clue === 0
+			let neighbors = this.findNeighbors(index);
+			for (let i = 0; i < neighbors.length; i++) {
+				if (neighbors[i] > 0) {
+					// reveal only this box
+				} else {
+					// check neighbors or this box too
+				}
+			}
+		}
+	},
+	
+	checkWin: function() {				// returns true if flagLocations match mineLocations
+		let mine = this.mineLocations,
+			flag = this.flagLocations;
+		let count = 0;
+		for (let i = 0; i < mine.length; i++) {
+			for (let j = 0; j < flag.length; j++) {
+				if (mine[i] === flag[j]) {
+					count += 1;
+				}
+			}
+			if (count === mine.length) return true;
+		}
+		return false;
 	},
 
 };
 
-var game = new Game(5);
+var game = new Game();
+game.createBoard(9);
 
