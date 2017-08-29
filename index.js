@@ -1,3 +1,8 @@
+easyButton = document.getElementById('easy');
+mediumButton = document.getElementById('medium');
+hardButton = document.getElementById('hard');
+boardElement = document.getElementById('board');
+
 function Game() {
 	this.dimension;
 	this.totalBoxes;
@@ -136,22 +141,32 @@ Game.prototype = {
 };
 
 
-
-easyButton = document.getElementById('easy');
-mediumButton = document.getElementById('medium');
-hardbutton = document.getElementById('hard');
-boardElement = document.getElementById('board');
-
-const game = {
-	board: [ 'm', 2, 0, 'm', 3, 1, 1, 2, 'm'],
-	dimension: 3
-}
-
 const boardUI = {
-	render: function() {
-		let width = game.dimension * 20;
+
+	listen: function() {
+		easyButton.onclick = function() {
+			var game = new Game();
+			game.createBoard(9);
+			boardUI.render(9);
+		}
+		mediumButton.onclick = function() {
+			var game = new Game();
+			game.createBoard(16);
+			boardUI.render(16);
+		}	
+		hardButton.onclick = function() {
+			var game = new Game();
+			game.createBoard(24);
+			boardUI.render(24);
+		}
+	},
+
+	render: function(dimension) {
+		boardElement.innerHTML = '';
+		let width = dimension * 20;
+		let length = dimension * dimension;
 		boardElement.style.width = `${width}px`;
-		for (let i = 0; i < game.board.length; i++) {
+		for (let i = 0; i < length; i++) {
 			let div = document.createElement('div');
 			div.id = `box${i}`;
 			div.addEventListener('click', boardUI.leftHandler, false);
@@ -193,14 +208,9 @@ const boardUI = {
 	}
 }
 
-easyButton.onclick = function() {
-	var game = new Game();
-	game.createBoard(9);
-	boardUI.render();
-}
 
 document.addEventListener('DOMContentLoaded', () => {
-	
+	boardUI.listen();
 });
 
 
