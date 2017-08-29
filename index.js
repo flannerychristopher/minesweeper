@@ -172,6 +172,8 @@ const boardUI = {
 		let index = event.target.getAttribute('index');
 		if (game.board[index] > 0) {
 			event.target.textContent = game.board[index].toString();
+		} else if (game.board[index] === 'm') {
+			event.target.className = 'mine';
 		}
 		event.target.removeEventListener('click', boardUI.leftHandler, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);

@@ -9,10 +9,10 @@ html {
 body {
 	background: grey;
 	color: white;
+	font-family: 'Courier New', Courier, mono-space;
 }
 
 header {
-	
 	background: black;
 	text-align: center;
 	padding: 10px;
@@ -20,12 +20,10 @@ header {
 
 button {
 	margin: 0 auto;
-	background: white;
 	color: black;
 }
 
 #board {
-
 	margin: 40px auto 0 auto;
 }
 
@@ -38,7 +36,6 @@ button {
 	cursor: pointer;
 	color: grey;
 	background: grey;
-	
 }
 
 #board div.show {
@@ -46,8 +43,13 @@ button {
 }
 
 #board div.flag {
-	/*background: red;*/
 	background-image: url('./flag.png');
+	background-size: contain;
+}
+
+#board div.mine {
+	background-color: white;
+	background-image: url('./mine.png');
 	background-size: contain;
 }
 
