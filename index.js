@@ -22,6 +22,7 @@ Game.prototype = {
 		array = this.addMines(array);
 		array = this.addClues(array);
 		this.board = array;
+		boardUI.render(dimension);
 	},
 
 	addMines: function(array) {
@@ -39,9 +40,8 @@ Game.prototype = {
 		return Math.floor(Math.random() * Math.floor(this.totalBoxes));
 	},
 
-	findNeighbors: function(index) {	// returns array of index numbers
+	findNeighbors: function(i) {	// returns array of neighboring index numbers
 		let result = [];
-		let i = index;
 		let d = this.dimension;
 		let omega = this.totalBoxes;
 		if (i === 0) {														// first
@@ -61,7 +61,7 @@ Game.prototype = {
 		} else if (i === omega - 1) {										// bottom right corner
 			result = [i - d - 1, i - d, i - 1];
 		} else {															// middle
-			result =[i-d-1, i-d, i-d+1, i-1, i+1, i+d-1, i+d, i+d+1];
+			result = [i-d-1, i-d, i-d+1, i-1, i+1, i+d-1, i+d, i+d+1];
 		}
 		return result;
 	},
@@ -72,16 +72,14 @@ Game.prototype = {
 			if (array[i] === 'm') {
 				let result = this.findNeighbors(i);
 				for (let j = 0; j < result.length; j++) {
-					let index = result[j];
-					if (array[index] !== 'm') {
-						neighbors.push(index);
-					}
+					let k = result[j];
+					if (array[k] !== 'm') neighbors.push(k);
 				}
 			}
 		}
-		for (let k = 0; k < neighbors.length; k++) {
-			let index = neighbors[k];
-			array[index] += 1;
+		for (let i = 0; i < neighbors.length; i++) {
+			let j = neighbors[i];
+			array[j] += 1;
 		}
 		return array;
 	},
@@ -97,8 +95,8 @@ Game.prototype = {
 			}
 		}
 		if (this.flagLocations.length === this.mineLocations.length) {										// win or out of flags
-			if (game.checkWin()) {
-				game.win();
+			if (this.checkWin()) {
+				this.win();
 			} else {
 				messageElement.textContent = 'out of flags!';
 			}
@@ -122,12 +120,12 @@ Game.prototype = {
 
 	win: function() {
 		messageElement.textContent = 'You win!';
-		boardUI.removeAllEventListeners();
+		boardUI.revealBoard();
 	},
 
 	lose: function() {
 		messageElement.textContent = 'You lose :-(';
-		boardUI.removeAllEventListeners();
+		boardUI.revealBoard();
 	}
 };
 
@@ -136,17 +134,17 @@ const boardUI = {
 		easyButton.onclick = function() {
 			game = new Game();
 			game.createBoard(9);
-			boardUI.render(9);
+			// boardUI.render(9);
 		}
 		mediumButton.onclick = function() {
 			game = new Game();
 			game.createBoard(16);
-			boardUI.render(16);
+			// boardUI.render(16);
 		}	
 		hardButton.onclick = function() {
 			game = new Game();
 			game.createBoard(24);
-			boardUI.render(24);
+			// boardUI.render(24);
 		}
 	},
 
@@ -174,14 +172,12 @@ const boardUI = {
 			game.board[index] = -1;
 			boardUI.showNeighbors(index);
 		} else if (game.board[index] === 'm') {
-			box.className = 'mine';
 			game.lose();
 		}
 	},
 
 	showNeighbors: function(index) {
 		let neighbors = game.findNeighbors(index);
-		// for (let i = 0; i < neighbors.length; i++) { boardUI.showBox(neighbors[i]);	}
 		neighbors.forEach(i => boardUI.showBox(i));
 	},
 	
@@ -214,9 +210,10 @@ const boardUI = {
 		game.toggleFlag(index);
 	},
 
-	removeAllEventListeners: function() {
+	revealBoard: function() {
 		for (let i = 0; i < game.totalBoxes; i++) {
 			let box = document.getElementById(i);
+			game.board[i] === 'm' ? box.className = 'mine' : box.className = 'show';
 			box.removeEventListener('click', boardUI.leftHandler, false);
 			box.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
 			box.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
