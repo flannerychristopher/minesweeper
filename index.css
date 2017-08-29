@@ -8,10 +8,11 @@ html {
 
 body {
 	background: grey;
+	color: white;
 }
 
 header {
-	color: white;
+	
 	background: black;
 	text-align: center;
 	padding: 10px;
@@ -45,4 +46,11 @@ button {
 
 #board div.flag {
 	background: red;
+}
+
+#message {
+	display: block;
+	clear: both;
+	text-align: center;
+	margin: 20px auto;
 }

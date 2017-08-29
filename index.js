@@ -2,11 +2,11 @@ easyButton = document.getElementById('easy');
 mediumButton = document.getElementById('medium');
 hardButton = document.getElementById('hard');
 boardElement = document.getElementById('board');
+messageElement = document.getElementById('message');
 
 function Game() {
 	this.dimension;
 	this.totalBoxes;
-	// this.board = this.newBoard(this.totalBoxes);
 	this.board = [];
 	this.mineLocations = [];
 	this.flagLocations = [];
@@ -25,12 +25,6 @@ Game.prototype = {
 	},
 
 	addMines: function(array) {
-		// let mines = [];
-		// while (mines.length < this.dimension) {
-		// 	let index = this.randomIndex();
-		// 	array[index] = 'm';
-		// 	mines = array.filter(item => item === 'm');
-		// }
 		while (this.mineLocations.length < this.dimension) {
 			let index = this.randomIndex();
 			if (this.mineLocations.indexOf(index) === -1) {
@@ -95,14 +89,12 @@ Game.prototype = {
 		if (this.flagLocations.length < this.mineLocations.length) {
 			if (this.flagLocations.indexOf(index) === -1) {			// place a flag
 				this.flagLocations.push(index);
-				// add class UI
 			} else {												// remove a flag
 				let j = this.flagLocations.indexOf(index);
 				this.flagLocations.splice(j,1);
-				// remove class UI
 			}
 		} else { // out of flags
-			// message on UI 
+			messageElement.textContent = 'out of flags!';
 		}
 	},
 	
@@ -142,20 +134,19 @@ Game.prototype = {
 
 
 const boardUI = {
-
 	listen: function() {
 		easyButton.onclick = function() {
-			var game = new Game();
+			game = new Game();
 			game.createBoard(9);
 			boardUI.render(9);
 		}
 		mediumButton.onclick = function() {
-			var game = new Game();
+			game = new Game();
 			game.createBoard(16);
 			boardUI.render(16);
 		}	
 		hardButton.onclick = function() {
-			var game = new Game();
+			game = new Game();
 			game.createBoard(24);
 			boardUI.render(24);
 		}
@@ -168,7 +159,7 @@ const boardUI = {
 		boardElement.style.width = `${width}px`;
 		for (let i = 0; i < length; i++) {
 			let div = document.createElement('div');
-			div.id = `box${i}`;
+			div.setAttribute('index', i);
 			div.addEventListener('click', boardUI.leftHandler, false);
 			div.addEventListener('contextmenu', boardUI.rightHandlerOn, false);
 			boardElement.appendChild(div);
@@ -178,7 +169,7 @@ const boardUI = {
 	leftHandler: function(event) {
 		event.preventDefault();
 		event.target.className = 'show';
-		let index = event.target.id[3];
+		let index = event.target.getAttribute('index');
 		if (game.board[index] > 0) {
 			event.target.textContent = game.board[index].toString();
 		}
@@ -186,32 +177,30 @@ const boardUI = {
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
 		// check if mine
-		// checkWin
 	},
 	
-	rightHandlerOn: function(event) {
+	rightHandlerOn: function(event) {			// add flag
 		event.preventDefault();
 		event.target.className = 'flag';
 		event.target.removeEventListener('click', boardUI.leftHandler, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.addEventListener('contextmenu', boardUI.rightHandlerOff, false);
-		// toggleFlag()
+		let index = event.target.getAttribute('index');
+		game.toggleFlag(index);	
+		// check for a win
 	},
 	
-	rightHandlerOff: function(event) {
+	rightHandlerOff: function(event) {			// remove flag
 		event.preventDefault();
 		event.target.className = '';
 		event.target.addEventListener('click', boardUI.leftHandler, false);
 		event.target.addEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
-		// toggleFlag
+		let index = event.target.getAttribute('index');
+		game.toggleFlag(index);
 	}
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
 	boardUI.listen();
 });
-
-
-
