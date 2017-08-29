@@ -39,14 +39,15 @@ Game.prototype = {
 		return Math.floor(Math.random() * Math.floor(this.totalBoxes));
 	},
 
-	findNeighbors: function(i) {	// returns array of index numbers
+	findNeighbors: function(index) {	// returns array of index numbers
 		let result = [];
-		let d = this.dimension;
-		let omega = this.totalBoxes;
+		let i = parseInt(index);
+		let d = parseInt(this.dimension);
+		let omega = parseInt(this.totalBoxes);
 		if (i === 0) {														// first
 			result = [1, d, d + 1];
 		} else if (i > 0 && i < d - 1) {									// top row
-			result = [ i - 1, i + 1, i + d - 1, i + d, i + d + 1];
+			result = [ (i-1), (i+1), (i+d-1), (i+d), (i+d+1)];
 		} else if (i === d - 1) {											// top right
 			result = [i - 1, i + d - 1, i + d];
 		} else if (i % d === 0 && i !== 0 && i !== omega - d) { 			// left column
@@ -93,7 +94,7 @@ Game.prototype = {
 				let j = this.flagLocations.indexOf(index);
 				this.flagLocations.splice(j,1);
 			}
-		} else { // out of flags
+		} else { 												// out of flags
 			messageElement.textContent = 'out of flags!';
 		}
 	},
@@ -114,7 +115,7 @@ Game.prototype = {
 			}
 		}
 	},
-	
+
 	checkWin: function() {				// returns true if flagLocations match mineLocations
 		let mine = this.mineLocations,
 			flag = this.flagLocations;
@@ -131,7 +132,6 @@ Game.prototype = {
 	},
 
 };
-
 
 const boardUI = {
 	listen: function() {
@@ -159,26 +159,45 @@ const boardUI = {
 		boardElement.style.width = `${width}px`;
 		for (let i = 0; i < length; i++) {
 			let div = document.createElement('div');
-			div.setAttribute('index', i);
+			div.id = i;
 			div.addEventListener('click', boardUI.leftHandler, false);
 			div.addEventListener('contextmenu', boardUI.rightHandlerOn, false);
 			boardElement.appendChild(div);
 		}
 	},
+
+	showBox: function(index) {
+		let box = document.getElementById(index);
+		box.className = 'show';
+		if (game.board[index] > 0) {
+			box.textContent = game.board[index].toString();
+		// } else if (game.board[index] === 'm') {
+		// 	box.className = 'mine';
+		} else if (game.board[index] === 0) {
+			game.board[index] = -1;
+			boardUI.showNeighbors(index);
+			
+		}
+	},
+
+	showNeighbors: function(index) {
+		let neighbors = game.findNeighbors(index);
+		// console.log(neighbors);
+
+		for (let i = 0; i < neighbors.length; i++) {
+			boardUI.showBox(neighbors[i]);			
+		}
+	},
 	
 	leftHandler: function(event) {
 		event.preventDefault();
-		event.target.className = 'show';
-		let index = event.target.getAttribute('index');
-		if (game.board[index] > 0) {
-			event.target.textContent = game.board[index].toString();
-		} else if (game.board[index] === 'm') {
-			event.target.className = 'mine';
-		}
+		
+		let index = event.target.id;
+		boardUI.showBox(index);
+
 		event.target.removeEventListener('click', boardUI.leftHandler, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
-		// check if mine
 	},
 	
 	rightHandlerOn: function(event) {			// add flag
@@ -187,7 +206,7 @@ const boardUI = {
 		event.target.removeEventListener('click', boardUI.leftHandler, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.addEventListener('contextmenu', boardUI.rightHandlerOff, false);
-		let index = event.target.getAttribute('index');
+		let index = event.target.id;
 		game.toggleFlag(index);	
 		// check for a win
 	},
