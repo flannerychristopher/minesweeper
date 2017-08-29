@@ -89,13 +89,18 @@ Game.prototype = {
 	toggleFlag: function(index) {
 		if (this.flagLocations.length < this.mineLocations.length) {
 			if (this.flagLocations.indexOf(index) === -1) {			// place a flag
-				this.flagLocations.push(index);
+				this.flagLocations.push(parseInt(index));
 			} else {												// remove a flag
 				let j = this.flagLocations.indexOf(index);
 				this.flagLocations.splice(j,1);
 			}
-		} else { 												// out of flags
-			messageElement.textContent = 'out of flags!';
+		} else {										// win or out of flags
+			if (checkWin()) {
+				game.win();
+			} else {
+				messageElement.textContent = 'out of flags!';
+			}
+			
 		}
 	},
 	
@@ -130,6 +135,16 @@ Game.prototype = {
 		}
 		return false;
 	},
+
+	win: function() {
+		messageElement.textContent = 'You win!';
+		boardUI.removeAllEventListeners();
+	},
+
+	lose: function() {
+		messageElement.textContent = 'You lose :-(';
+		boardUI.removeAllEventListeners();
+	}
 
 };
 
@@ -171,19 +186,17 @@ const boardUI = {
 		box.className = 'show';
 		if (game.board[index] > 0) {
 			box.textContent = game.board[index].toString();
-		// } else if (game.board[index] === 'm') {
-		// 	box.className = 'mine';
 		} else if (game.board[index] === 0) {
 			game.board[index] = -1;
 			boardUI.showNeighbors(index);
-			
+		} else if (game.board[index] === 'm') {
+			box.className = 'mine';
+			game.lose();
 		}
 	},
 
 	showNeighbors: function(index) {
 		let neighbors = game.findNeighbors(index);
-		// console.log(neighbors);
-
 		for (let i = 0; i < neighbors.length; i++) {
 			boardUI.showBox(neighbors[i]);			
 		}
@@ -219,6 +232,15 @@ const boardUI = {
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
 		let index = event.target.getAttribute('index');
 		game.toggleFlag(index);
+	},
+
+	removeAllEventListeners: function() {
+		for (let i = 0; i < game.totalBoxes; i++) {
+			let box = document.getElementById(i);
+			box.removeEventListener('click', boardUI.leftHandler, false);
+			box.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
+			box.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
+		}
 	}
 }
 
