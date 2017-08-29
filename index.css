@@ -38,6 +38,7 @@ button {
 	cursor: pointer;
 	color: grey;
 	background: grey;
+	
 }
 
 #board div.show {
@@ -45,7 +46,9 @@ button {
 }
 
 #board div.flag {
-	background: red;
+	/*background: red;*/
+	background-image: url('./flag.png');
+	background-size: contain;
 }
 
 #message {
