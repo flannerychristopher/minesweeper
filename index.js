@@ -135,6 +135,73 @@ Game.prototype = {
 
 };
 
-var game = new Game();
-game.createBoard(9);
+
+
+easyButton = document.getElementById('easy');
+mediumButton = document.getElementById('medium');
+hardbutton = document.getElementById('hard');
+boardElement = document.getElementById('board');
+
+const game = {
+	board: [ 'm', 2, 0, 'm', 3, 1, 1, 2, 'm'],
+	dimension: 3
+}
+
+const boardUI = {
+	render: function() {
+		let width = game.dimension * 20;
+		boardElement.style.width = `${width}px`;
+		for (let i = 0; i < game.board.length; i++) {
+			let div = document.createElement('div');
+			div.id = `box${i}`;
+			div.addEventListener('click', boardUI.leftHandler, false);
+			div.addEventListener('contextmenu', boardUI.rightHandlerOn, false);
+			boardElement.appendChild(div);
+		}
+	},
+	
+	leftHandler: function(event) {
+		event.preventDefault();
+		event.target.className = 'show';
+		let index = event.target.id[3];
+		if (game.board[index] > 0) {
+			event.target.textContent = game.board[index].toString();
+		}
+		event.target.removeEventListener('click', boardUI.leftHandler, false);
+		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
+		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
+		// check if mine
+		// checkWin
+	},
+	
+	rightHandlerOn: function(event) {
+		event.preventDefault();
+		event.target.className = 'flag';
+		event.target.removeEventListener('click', boardUI.leftHandler, false);
+		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
+		event.target.addEventListener('contextmenu', boardUI.rightHandlerOff, false);
+		// toggleFlag()
+	},
+	
+	rightHandlerOff: function(event) {
+		event.preventDefault();
+		event.target.className = '';
+		event.target.addEventListener('click', boardUI.leftHandler, false);
+		event.target.addEventListener('contextmenu', boardUI.rightHandlerOn, false);
+		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
+		// toggleFlag
+	}
+}
+
+easyButton.onclick = function() {
+	var game = new Game();
+	game.createBoard(9);
+	boardUI.render();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+	
+});
+
+
 
