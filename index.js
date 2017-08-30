@@ -19,9 +19,7 @@ Game.prototype = {
 		this.dimension = dimension;
 		this.totalBoxes = dimension * dimension;
 		let array = Array.from({ length: this.totalBoxes }, (v, i) => 0);
-		array = this.addMines(array);
-		array = this.addClues(array);
-		this.board = array;
+		this.board = this.addClues( this.addMines(array) );
 		boardUI.render(dimension);
 	},
 
@@ -36,7 +34,7 @@ Game.prototype = {
 		return array;
 	},
 
-	randomIndex: function() {
+	randomIndex: function() {		// for randomly placing mines
 		return Math.floor(Math.random() * Math.floor(this.totalBoxes));
 	},
 
@@ -68,7 +66,7 @@ Game.prototype = {
 
 	addClues: function(array) {
 		let neighbors = [];
-		for (let i = 0; i < array.length; i++) {
+		for (let i = 0; i < array.length; i++) {			// find non-mine neighbors
 			if (array[i] === 'm') {
 				let result = this.findNeighbors(i);
 				for (let j = 0; j < result.length; j++) {
@@ -77,7 +75,7 @@ Game.prototype = {
 				}
 			}
 		}
-		for (let i = 0; i < neighbors.length; i++) {
+		for (let i = 0; i < neighbors.length; i++) {		// add clues to them
 			let j = neighbors[i];
 			array[j] += 1;
 		}
@@ -104,16 +102,12 @@ Game.prototype = {
 	},
 
 	checkWin: function() {				// returns true if flagLocations match mineLocations
-		let mine = this.mineLocations,
-			flag = this.flagLocations;
 		let count = 0;
-		for (let i = 0; i < mine.length; i++) {
-			for (let j = 0; j < flag.length; j++) {
-				if (mine[i] === flag[j]) {
-					count += 1;
-				}
+		for (let i = 0; i < this.mineLocations.length; i++) {
+			for (let j = 0; j < this.flagLocations.length; j++) {
+				this.mineLocations[i] === this.flagLocations[j] ? count += 1 : count;
 			}
-			if (count === mine.length) return true;
+			if (count === this.mineLocations.length) return true;
 		}
 		return false;
 	},
@@ -134,17 +128,14 @@ const boardUI = {
 		easyButton.onclick = function() {
 			game = new Game();
 			game.createBoard(9);
-			// boardUI.render(9);
 		}
 		mediumButton.onclick = function() {
 			game = new Game();
 			game.createBoard(16);
-			// boardUI.render(16);
 		}	
 		hardButton.onclick = function() {
 			game = new Game();
 			game.createBoard(24);
-			// boardUI.render(24);
 		}
 	},
 
@@ -166,6 +157,7 @@ const boardUI = {
 	showBox: function(index) {
 		let box = document.getElementById(index);
 		box.className = 'show';
+		boardUI.removeListeners(box);
 		if (game.board[index] > 0) {
 			box.textContent = game.board[index].toString();
 		} else if (game.board[index] === 0) {
@@ -183,11 +175,7 @@ const boardUI = {
 	
 	leftHandler: function(event) {
 		event.preventDefault();
-		let index = parseInt(event.target.id);
-		boardUI.showBox(index);
-		event.target.removeEventListener('click', boardUI.leftHandler, false);
-		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
-		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
+		boardUI.showBox( parseInt(event.target.id) );
 	},
 	
 	rightHandlerOn: function(event) {			// add flag
@@ -196,8 +184,7 @@ const boardUI = {
 		event.target.removeEventListener('click', boardUI.leftHandler, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.addEventListener('contextmenu', boardUI.rightHandlerOff, false);
-		let index = parseInt(event.target.id);
-		game.toggleFlag(index);	
+		game.toggleFlag( parseInt(event.target.id) );	
 	},
 	
 	rightHandlerOff: function(event) {			// remove flag
@@ -206,17 +193,20 @@ const boardUI = {
 		event.target.addEventListener('click', boardUI.leftHandler, false);
 		event.target.addEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
-		let index = parseInt(event.target.id);
-		game.toggleFlag(index);
+		game.toggleFlag( parseInt(event.target.id) );
+	},
+
+	removeListeners: function(element) {
+		element.removeEventListener('click', boardUI.leftHandler, false);
+		element.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
+		element.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
 	},
 
 	revealBoard: function() {
 		for (let i = 0; i < game.totalBoxes; i++) {
 			let box = document.getElementById(i);
 			game.board[i] === 'm' ? box.className = 'mine' : box.className = 'show';
-			box.removeEventListener('click', boardUI.leftHandler, false);
-			box.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
-			box.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
+			boardUI.removeListeners(box);
 		}
 	}
 }
