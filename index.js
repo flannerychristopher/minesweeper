@@ -33,7 +33,28 @@ Game.prototype = {
 		return Math.floor(Math.random() * Math.floor(this.totalBoxes));
 	},
 
-	findNeighbors: function(i) {	// returns array of neighboring index numbers
+	findNeighbors: function(x) {	// returns array of neighboring index numbers
+		let d = this.dimension,
+			base = [x-d-1, x-d, x-d+1, x-1, x+1, x+d-1, x+d, x+d+1],
+			result = [];
+		for (i = 0; i < base.length; i++) {					// base[i] is the neigbor index
+			let num = parseInt(base[i]);
+			for (j = 0; j < this.totalBoxes; j++) {		// j is the board index
+				if (base[i] === j) {						// index of neighbor index exists on board
+					if (x % d === 0) {								// left column
+						if ((num+1) % d !== 0) result.push(num);
+					} else if ((x+1) % d === 0) {					// right column
+						if (num % d !== 0) result.push(num);
+					} else {										// middle
+						result.push(base[i]);
+					}
+				}
+			}
+		}
+		return result;
+	},
+
+	oldFindNeighbors: function(i) {	// returns array of neighboring index numbers
 		let result = [];
 		let d = this.dimension;
 		let omega = this.totalBoxes;
@@ -122,7 +143,10 @@ const boardUI = {
 	listen: function() {
 		document.getElementById('easy').onclick = () => game = new Game(9);
 		document.getElementById('medium').onclick = () => game = new Game(16);
-		document.getElementById('hard').onclick = () => game = new Game(24);
+		// document.getElementById('hard').onclick = () => game = new Game(24);
+		document.getElementById('hard').onclick = function() {
+			game = new Game(24);
+		}
 	},
 
 	render: function(dimension) {
