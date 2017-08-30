@@ -1,23 +1,21 @@
 boardElement = document.getElementById('board');
 messageElement = document.getElementById('message');
 
-function Game() {
-	this.dimension;
-	this.totalBoxes;
-	this.board = [];
+function Game(dimension) {
+	this.dimension = dimension;
+	this.totalBoxes = dimension * dimension;
 	this.mineLocations = [];
 	this.flagLocations = [];
+	this.board = this.createBoard(dimension);
 }
 
 Game.prototype = {
 	constructor: Game,
 
-	createBoard: function(dimension) {
-		this.dimension = dimension;
-		this.totalBoxes = dimension * dimension;
-		let array = Array.from({ length: this.totalBoxes }, (v, i) => 0);
-		this.board = this.addClues( this.addMines(array) );
+	createBoard: function(dimension) {		// renders UI and places mines/clues
 		boardUI.render(dimension);
+		let array = Array.from({ length: this.totalBoxes }, (v, i) => 0);
+		return this.addClues( this.addMines(array) );
 	},
 
 	addMines: function(array) {
@@ -122,18 +120,9 @@ Game.prototype = {
 
 const boardUI = {
 	listen: function() {
-		document.getElementById('easy').onclick = function() {
-			game = new Game();
-			game.createBoard(9);
-		}
-		document.getElementById('medium').onclick = function() {
-			game = new Game();
-			game.createBoard(16);
-		}	
-		document.getElementById('hard').onclick = function() {
-			game = new Game();
-			game.createBoard(24);
-		}
+		document.getElementById('easy').onclick = () => game = new Game(9);
+		document.getElementById('medium').onclick = () => game = new Game(16);
+		document.getElementById('hard').onclick = () => game = new Game(24);
 	},
 
 	render: function(dimension) {
