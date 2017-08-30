@@ -1,6 +1,3 @@
-easyButton = document.getElementById('easy');
-mediumButton = document.getElementById('medium');
-hardButton = document.getElementById('hard');
 boardElement = document.getElementById('board');
 messageElement = document.getElementById('message');
 
@@ -125,15 +122,15 @@ Game.prototype = {
 
 const boardUI = {
 	listen: function() {
-		easyButton.onclick = function() {
+		document.getElementById('easy').onclick = function() {
 			game = new Game();
 			game.createBoard(9);
 		}
-		mediumButton.onclick = function() {
+		document.getElementById('medium').onclick = function() {
 			game = new Game();
 			game.createBoard(16);
 		}	
-		hardButton.onclick = function() {
+		document.getElementById('hard').onclick = function() {
 			game = new Game();
 			game.createBoard(24);
 		}
@@ -211,6 +208,4 @@ const boardUI = {
 	}
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-	boardUI.listen();
-});
+document.addEventListener('DOMContentLoaded', () => boardUI.listen());
