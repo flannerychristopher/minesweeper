@@ -37,10 +37,10 @@ Game.prototype = {
 		let d = this.dimension,
 			base = [x-d-1, x-d, x-d+1, x-1, x+1, x+d-1, x+d, x+d+1],
 			result = [];
-		for (i = 0; i < base.length; i++) {					// base[i] / num is the neigbor index
+		for (i = 0; i < base.length; i++) {							// base[i] / num is the neigbor index
 			let num = parseInt(base[i]);
-			for (j = 0; j < this.totalBoxes; j++) {			// j is the board index
-				if (base[i] === j) {						// does neighbor index exists on board?
+			for (j = 0; j < this.totalBoxes; j++) {					// j is the board index
+				if (base[i] === j) {								// does neighbor index exists on board?
 					if (x % d === 0) {								// left column
 						if ((num+1) % d !== 0) result.push(num);
 					} else if ((x+1) % d === 0) {					// right column
@@ -50,32 +50,6 @@ Game.prototype = {
 					}
 				}
 			}
-		}
-		return result;
-	},
-
-	oldFindNeighbors: function(i) {	// returns array of neighboring index numbers
-		let result = [];
-		let d = this.dimension;
-		let omega = this.totalBoxes;
-		if (i === 0) {														// first
-			result = [1, d, d + 1];
-		} else if (i > 0 && i < d - 1) {									// top row
-			result = [ (i-1), (i+1), (i+d-1), (i+d), (i+d+1)];
-		} else if (i === d - 1) {											// top right
-			result = [i - 1, i + d - 1, i + d];
-		} else if (i % d === 0 && i !== 0 && i !== omega - d) { 			// left column
-			result = [i - d, i - d + 1, i + 1, i + d, i + d + 1];
-		} else if ((i + 1) % d === 0 && i !== d - 1 && i !== omega - 1) {	// right column
-			result = [i - d - 1, i - d, i - 1, i + d - 1, i + d];
-		} else if (i === omega - d) {										// bottom left corner
-			result = [i - d, i - d + 1, i + 1];
-		} else if (i > omega - d && i < omega - 1) {						// bottom row
-			result = [i - d - 1, i - d, i - d + 1, i - 1, i + 1];
-		} else if (i === omega - 1) {										// bottom right corner
-			result = [i - d - 1, i - d, i - 1];
-		} else {															// middle
-			result = [i-d-1, i-d, i-d+1, i-1, i+1, i+d-1, i+d, i+d+1];
 		}
 		return result;
 	},
@@ -108,7 +82,7 @@ Game.prototype = {
 				this.flagLocations.splice(j,1);
 			}
 		}
-		if (this.flagLocations.length === this.mineLocations.length) {										// win or out of flags
+		if (this.flagLocations.length === this.mineLocations.length) {	// win or out of flags
 			if (this.checkWin()) {
 				this.win();
 			} else {
@@ -140,13 +114,12 @@ Game.prototype = {
 };
 
 const boardUI = {
+	game: {},
+
 	listen: function() {
-		document.getElementById('easy').onclick = () => game = new Game(9);
-		document.getElementById('medium').onclick = () => game = new Game(16);
-		// document.getElementById('hard').onclick = () => game = new Game(24);
-		document.getElementById('hard').onclick = function() {
-			game = new Game(24);
-		}
+		document.getElementById('easy').onclick = () => this.game = new Game(9);
+		document.getElementById('medium').onclick = () => this.game = new Game(16);
+		document.getElementById('hard').onclick = () => this.game = new Game(24);
 	},
 
 	render: function(dimension) {
@@ -168,18 +141,18 @@ const boardUI = {
 		let box = document.getElementById(index);
 		box.className = 'show';
 		boardUI.removeListeners(box);
-		if (game.board[index] > 0) {
-			box.textContent = game.board[index].toString();
-		} else if (game.board[index] === 0) {
-			game.board[index] = -1;
+		if (this.game.board[index] > 0) {						// box is a clue
+			box.textContent = this.game.board[index].toString();
+		} else if (this.game.board[index] === 0) {				// box is blank
+			this.game.board[index] = -1;
 			boardUI.showNeighbors(index);
-		} else if (game.board[index] === 'm') {
-			game.lose();
+		} else if (this.game.board[index] === 'm') {			// mine
+			this.game.lose();
 		}
 	},
 
 	showNeighbors: function(index) {
-		let neighbors = game.findNeighbors(index);
+		let neighbors = this.game.findNeighbors(index);
 		neighbors.forEach(i => boardUI.showBox(i));
 	},
 	
@@ -194,7 +167,7 @@ const boardUI = {
 		event.target.removeEventListener('click', boardUI.leftHandler, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.addEventListener('contextmenu', boardUI.rightHandlerOff, false);
-		game.toggleFlag( parseInt(event.target.id) );	
+		boardUI.game.toggleFlag( parseInt(event.target.id) );	
 	},
 	
 	rightHandlerOff: function(event) {			// remove flag
@@ -203,7 +176,7 @@ const boardUI = {
 		event.target.addEventListener('click', boardUI.leftHandler, false);
 		event.target.addEventListener('contextmenu', boardUI.rightHandlerOn, false);
 		event.target.removeEventListener('contextmenu', boardUI.rightHandlerOff, false);
-		game.toggleFlag( parseInt(event.target.id) );
+		boardUI.game.toggleFlag( parseInt(event.target.id) );
 	},
 
 	removeListeners: function(element) {
@@ -213,9 +186,9 @@ const boardUI = {
 	},
 
 	revealBoard: function() {
-		for (let i = 0; i < game.totalBoxes; i++) {
+		for (let i = 0; i < this.game.totalBoxes; i++) {
 			let box = document.getElementById(i);
-			game.board[i] === 'm' ? box.className = 'mine' : box.className = 'show';
+			boardUI.game.board[i] === 'm' ? box.className = 'mine' : box.className = 'show';
 			boardUI.removeListeners(box);
 		}
 	}
